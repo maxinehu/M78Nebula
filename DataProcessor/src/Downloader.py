@@ -1,3 +1,9 @@
+'''
+Created on Oct 8, 2013
+
+@author: wenjie
+'''
+
 import ftplib
 import urllib
 import os

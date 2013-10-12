@@ -5,6 +5,7 @@ Created on Oct 8, 2013
 '''
 
 import gzip
+import tarfile
 import os
 import re
 import sys

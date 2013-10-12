@@ -48,7 +48,7 @@ def download(year):
         
         print "DOWNLOADING THE DATA OF " + str(year)
         
-        regex = r"[0-9]{6}-[0-9]{5}-%s.op.gz" % str(year)
+        regex = r"gsod_%s.tar" % str(year)
         filePattern = re.compile(regex)
         
         url = PREFIX + HOST + '/' + directory + str(year) + '/'

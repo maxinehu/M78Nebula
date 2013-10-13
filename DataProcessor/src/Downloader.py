@@ -10,6 +10,7 @@ import os
 import socket
 import re
 import sys
+import tarfile
 
 HOST = "ftp.ncdc.noaa.gov"
 USER = "ftp"
@@ -22,6 +23,17 @@ def getHtml(url):
     html = page.read()
     
     return html
+
+def decompress(year):  
+    yearFileName = "gsod_%s.tar" % str(year)
+    tar = tarfile.open(yearFileName)
+    names = tar.getnames()
+    
+    for name in names:
+        tar.extract(name, path=".")
+    tar.close()
+    
+    os.remove(yearFileName)
 
 def download(year):
     # connect to the ftp server
@@ -48,12 +60,14 @@ def download(year):
         
         print "DOWNLOADING THE DATA OF " + str(year)
         
-        regex = r"gsod_%s.tar" % str(year)
+        # regex = r"gsod_%s.tar" % str(year)
+        # download only the data from Gainesville, FL
+        regex = r"722146-12816-%s.op.gz|747560-12816-%s.op.gz" % (str(year), str(year))
         filePattern = re.compile(regex)
         
         url = PREFIX + HOST + '/' + directory + str(year) + '/'
         fileList = re.findall(filePattern, getHtml(url))
-        
+
         ftpConnection.cwd(str(year))
         
         for fileName in fileList:
@@ -70,3 +84,4 @@ if __name__ == '__main__':
     year = int(sys.argv[1])
     
     download(year)
+    # decompress(year)

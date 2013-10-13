@@ -5,7 +5,6 @@ Created on Oct 8, 2013
 '''
 
 import gzip
-import tarfile
 import os
 import re
 import sys
@@ -26,11 +25,12 @@ def decompress(year):
             
             os.remove(gzName)
             
-            decompressedFile = file(gzName[0:-3], 'w')
+            decompressedFile = file("data/" + gzName[0:-3], 'w')
             decompressedFile.write(content)
             decompressedFile.close()
             
     print "DECOMPRESS COMPLETED"
+    print ""
 
 if __name__ == '__main__':
     year = int(sys.argv[1])

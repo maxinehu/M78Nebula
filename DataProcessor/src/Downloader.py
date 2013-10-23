@@ -60,9 +60,9 @@ def download(year):
         
         print "DOWNLOADING THE DATA OF " + str(year)
         
-        # regex = r"gsod_%s.tar" % str(year)
+        regex = r"gsod_%s.tar" % str(year)
         # download only the data from Gainesville, FL
-        regex = r"722146-12816-%s.op.gz|747560-12816-%s.op.gz" % (str(year), str(year))
+        # regex = r"722146-12816-%s.op.gz|747560-12816-%s.op.gz" % (str(year), str(year))
         filePattern = re.compile(regex)
         
         url = PREFIX + HOST + '/' + directory + str(year) + '/'

@@ -15,6 +15,8 @@ import re
 
 PATH = "data/"
 
+FEATURES_IN_USE = ["TEMP", "DEWP", "SLP", "STP", "MXSPD", "GUST", "PRCP", "SNDP", "WDSP"]
+
 # All rows are string, need to specify the first/last index
 STN_START = 0           # Station number
 STN_END = 5
@@ -52,96 +54,99 @@ SNDP_END = 129
 # load the weather data for a specific year
 # including TEMP, DEWP, SLP, STP, WDSP, MXSPD, GUST, PRCP, SNDP
 def load_weather(year):
-    fileList = os.listdir(PATH)
+    file_list = os.listdir(PATH)
     
     regex = r"[0-9]{6}-[0-9]{5}-%s.op" % str(year)
-    filePattern = re.compile(regex)
+    file_pattern = re.compile(regex)
     
     # should only one file in file list
-    for fileName in fileList:
-        match = filePattern.match(fileName)
+    for file_name in file_list:
+        match = file_pattern.match(file_name)
         if match:
-            firstLine = True
+            first_line = True
             
-            features = {}
-            features["TEMP"] = []
-            features["DEWP"] = []
-            features["SLP"] = []
-            features["STP"] = []
-            features["MXSPD"] = []
-            features["GUST"] = []
-            features["PRCP"] = []
-            features["SNDP"] = []
-            features["WDSP"] = []
+            real_data = {}
+            real_data["TEMP"] = []
+            real_data["DEWP"] = []
+            real_data["SLP"] = []
+            real_data["STP"] = []
+            real_data["MXSPD"] = []
+            real_data["GUST"] = []
+            real_data["PRCP"] = []
+            real_data["SNDP"] = []
+            real_data["WDSP"] = []
             
-            for line in open(PATH + fileName):
+            for line in open(PATH + file_name):
                 # skip first line
-                if firstLine: 
-                    firstLine = False
+                if first_line: 
+                    first_line = False
                     continue
+                
                 # extract data, they are stored as string for each row
                 row = line.strip().split('\t')
                 # skip January to November
-                curModa = int(row[0][MODA_START: MODA_END + 1])
-                if(curModa == 201):
-                    break
-                
-                # I forgot why I needed a zero here...if not, an error occurs
-                temp = float(row[0][TEMP_START: TEMP_END + 1])
-                if temp == 9999.9:
-                    temp = 50.0
-                features["TEMP"].append(temp)
-                
-                dewp = float(row[0][DEWP_START: DEWP_END + 1])
-                if dewp == 9999.9:
-                    dewp = 50.0
-                features["DEWP"].append(dewp)
-                
-                slp = float(row[0][SLP_START: SLP_END + 1])
-                if slp == 9999.9:
-                    slp = 1010.0
-                features["SLP"].append(slp)
-                
-                stp = float(row[0][STP_START: STP_END + 1])
-                if stp == 9999.9:
-                    stp = 1010.0
-                features["STP"].append(stp)
-                
-                mxspd = float(row[0][MXSPD_START: MXSPD_END + 1])
-                if mxspd == 999.9:
-                    mxspd = 10.0
-                features["MXSPD"].append(mxspd)
-                
-                gust = float(row[0][GUST_START: GUST_END + 1])
-                if gust == 999.9:
-                    gust = 22.0
-                features["GUST"].append(gust)
-                
-                prcp = float(row[0][PRCP_START: PRCP_END + 1])
-                if prcp == 99.99:
-                    prcp = 0.0
-                features["PRCP"].append(prcp)
-                
-                sndp = float(row[0][SNDP_START: SNDP_END + 1])
-                if sndp == 999.9:
-                    sndp = 0.0
-                features["SNDP"].append(sndp)
-                
-                wdsp = float(row[0][WDSP_START: WDSP_END + 1])
-                if wdsp == 999.9:
-                    wdsp = 5.0
-                features["WDSP"].append(wdsp)     
+                cur_moda = int(row[0][MODA_START: MODA_END + 1])
+                if cur_moda < 208:
+                    # I forgot why I needed a zero here...if not, an error occurs
+                    temp = float(row[0][TEMP_START: TEMP_END + 1])
+                    if temp == 9999.9:
+                        temp = 50.0
+                    real_data["TEMP"].append(temp)
+                    
+                    dewp = float(row[0][DEWP_START: DEWP_END + 1])
+                    if dewp == 9999.9:
+                        dewp = 50.0
+                    real_data["DEWP"].append(dewp)
+                    
+                    slp = float(row[0][SLP_START: SLP_END + 1])
+                    if slp == 9999.9:
+                        slp = 1010.0
+                    real_data["SLP"].append(slp)
+                    
+                    stp = float(row[0][STP_START: STP_END + 1])
+                    if stp == 9999.9:
+                        stp = 1010.0
+                    real_data["STP"].append(stp)
+                    
+                    mxspd = float(row[0][MXSPD_START: MXSPD_END + 1])
+                    if mxspd == 999.9:
+                        mxspd = 10.0
+                    real_data["MXSPD"].append(mxspd)
+                    
+                    gust = float(row[0][GUST_START: GUST_END + 1])
+                    if gust == 999.9:
+                        gust = 22.0
+                    real_data["GUST"].append(gust)
+                    
+                    prcp = float(row[0][PRCP_START: PRCP_END + 1])
+                    if prcp == 99.99:
+                        prcp = 0.0
+                    real_data["PRCP"].append(prcp)
+                    
+                    sndp = float(row[0][SNDP_START: SNDP_END + 1])
+                    if sndp == 999.9:
+                        sndp = 0.0
+                    real_data["SNDP"].append(sndp)
+                    
+                    wdsp = float(row[0][WDSP_START: WDSP_END + 1])
+                    if wdsp == 999.9:
+                        wdsp = 5.0
+                    real_data["WDSP"].append(wdsp)
+                else:
+                    break        
 
-            return features
+            # first 31 elements are used to train, last 7 elements used to test
+            return real_data
 
-def train_single(feature, name):
+# return 7 days prediction
+def train_single(feature):
     from sklearn.svm import SVR
     
     svr_rbf = SVR(kernel='rbf', C=1e3, gamma=0.1)
     svr_lin = SVR(kernel='linear', C=1e3)
     svr_poly = SVR(kernel='poly', C=1e3, degree=2)
     
-    # 31 days history
+    # 31 days history, time is independent variant
     history = []
     for i in range(1, 32):
         h = [i]
@@ -175,10 +180,44 @@ def train_single(feature, name):
     pl.show()
     '''
 
-if __name__ == '__main__':
-    features = load_weather("2000")
+# combine all the predicted features to predict temperature
+def train_all(real_features, predicted_features, temp):
+    from sklearn.svm import SVR
     
-    # these are actual data
-    feature_names = ["TEMP", "DEWP", "SLP", "STP", "MXSPD", "GUST", "PRCP", "SNDP", "WDSP"]
-    ind = 0
-    print train_single(features[feature_names[ind]], feature_names[ind])
+    svr_rbf = SVR(kernel='rbf', C=1e3, gamma=0.1)
+    svr_lin = SVR(kernel='linear', C=1e3)
+    svr_poly = SVR(kernel='poly', C=1e3, degree=2)
+    
+    # fit the model, real_features are independent variants
+    predicted_temps = svr_rbf.fit(real_features[:31], temp[:31]).predict(predicted_features)
+    
+    return predicted_temps
+    
+def compose_features(features_dict):
+    features = []
+    num_samples = 0
+    for key in features_dict:
+        num_samples = len(features_dict[key])
+        break
+    
+    for i in range(num_samples):
+        feature = []
+        for j in range(1, len(FEATURES_IN_USE)):
+            feature.append(features_dict[FEATURES_IN_USE[j]][i])
+        features.append(feature)
+    return features
+
+if __name__ == '__main__':
+    # these are actual data, from 20000101 to 20000131, and 20000201 to 20000207
+    real_data = load_weather("2000")
+    
+    predicted_data = {}
+    for i in range(1, len(FEATURES_IN_USE)):
+        predicted_data[FEATURES_IN_USE[i]] = train_single(real_data[FEATURES_IN_USE[i]][:31])
+    
+    # dimensions are described as FEATURES_IN_USE
+    # it includes 7 samples since we want to predict weather for 1 week
+    predicted_features = compose_features(predicted_data)
+    real_features = compose_features(real_data)
+    
+    print train_all(real_features, predicted_features, real_data["TEMP"])

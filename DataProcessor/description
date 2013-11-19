@@ -1,0 +1,28 @@
+
+USAF = Air Force Datsav3 station number
+WBAN = NCDC WBAN number
+CTRY = WMO historical country ID, followed by FIPS country ID
+ST = State for US stations
+CALL = ICAO call sign
+LAT = Latitude in thousandths of decimal degrees
+LON = Longitude in thousandths of decimal degrees
+ELEV = Elevation in tenths of meters
+BEGIN = Beginning Period Of Record (YYYYMMDD). There may be reporting gaps within the P.O.R.
+END = Ending Period Of Record (YYYYMMDD). There may be reporting gaps within the P.O.R.
+
+Notes:
+- Missing station name, etc indicate the metadata are not currently available.
+- The term "bogus" indicates that the station name, etc are not available.
+- For a small % of the station entries in this list, climatic data are not 
+  available. These issues will be addressed. To determine data availability 
+  for each location, see the 'ish-inventory.txt' or 'ish-inventory.csv' file. 
+  
+USAF   WBAN  STATION NAME                  CTRY  ST CALL  LAT    LON     ELEV(.1M) BEGIN    END
+
+747560 12816 GAINESVILLE RGNL              US US FL KGNV  +29692 -082276 +00503    20100801 20130706
+722146 12816 GAINESVILLE RGNL              US US FL KGNV  +29692 -082276 +00503    19431101 20100731
+727930 24233 SEATTLE-TACOMA INTL           US US WA KSEA  +47444 -122314 +01323    19440708 20130706
+999999 14732 NEW YORK LAGUARDIA ARPT       US US NY KLGA  +40779 -073880 +00094    19480701 19721231
+725030 14732 NEW YORK/LA GUARDIA           US US NY KLGA  +40779 -073880 +00094    19350222 20130706
+724050 13743 WASHINGTON/NATIONAL           US US DC KDCA  +38848 -077034 +00198    19290701 20130706
+722050 12815 ORLANDO/JETPORT               US US FL KMCO  +28434 -081325 +00323    19520507 20130706

@@ -15,7 +15,7 @@ import re
 
 PATH = "data/"
 
-FEATURES_IN_USE = ["TEMP", "DEWP", "SLP", "STP", "MXSPD", "GUST", "PRCP", "SNDP", "WDSP"]
+FEATURES_IN_USE = ["TEMP", "DEWP", "WDSP", "PRCP"]
 
 # All rows are string, need to specify the first/last index
 STN_START = 0           # Station number
@@ -84,7 +84,7 @@ def load_weather(year):
                 
                 # extract data, they are stored as string for each row
                 row = line.strip().split('\t')
-                # skip January to November
+                # only read January, and first week of February as of now
                 cur_moda = int(row[0][MODA_START: MODA_END + 1])
                 if cur_moda < 208:
                     # I forgot why I needed a zero here...if not, an error occurs
@@ -139,12 +139,12 @@ def load_weather(year):
             return real_data
 
 # return 7 days prediction
-def train_single(feature):
+def predict_single(feature):
     from sklearn.svm import SVR
     
     svr_rbf = SVR(kernel='rbf', C=1e3, gamma=0.1)
-    svr_lin = SVR(kernel='linear', C=1e3)
-    svr_poly = SVR(kernel='poly', C=1e3, degree=2)
+    #svr_lin = SVR(kernel='linear', C=1e3)
+    #svr_poly = SVR(kernel='poly', C=1e3, degree=2)
     
     # 31 days history, time is independent variant
     history = []
@@ -160,33 +160,14 @@ def train_single(feature):
     predicted_feature = svr_rbf.fit(history, feature).predict(future)
     
     return predicted_feature
-    
-    '''
-    y_rbf = svr_rbf.fit(X, feature).predict(X)
-    y_lin = svr_lin.fit(X, feature).predict(X)
-    y_poly = svr_poly.fit(X, feature).predict(X)
-    
-    
-    import pylab as pl
-    pl.scatter(X, feature, c='k', label=name)
-    pl.hold('on')
-    pl.plot(X, y_rbf, c='g', label='RBF model')
-    pl.plot(X, y_lin, c='r', label='Linear model')
-    pl.plot(X, y_poly, c='b', label='Polynomial model')
-    pl.xlabel('date')
-    pl.ylabel(name)
-    pl.title('Support Vector Regression on ' + name)
-    pl.legend()
-    pl.show()
-    '''
 
 # combine all the predicted features to predict temperature
-def train_all(real_features, predicted_features, temp):
+def predict_all(real_features, predicted_features, temp):
     from sklearn.svm import SVR
     
     svr_rbf = SVR(kernel='rbf', C=1e3, gamma=0.1)
-    svr_lin = SVR(kernel='linear', C=1e3)
-    svr_poly = SVR(kernel='poly', C=1e3, degree=2)
+    #svr_lin = SVR(kernel='linear', C=1e3)
+    #svr_poly = SVR(kernel='poly', C=1e3, degree=2)
     
     # fit the model, real_features are independent variants
     predicted_temps = svr_rbf.fit(real_features[:31], temp[:31]).predict(predicted_features)
@@ -204,20 +185,69 @@ def compose_features(features_dict):
         feature = []
         for j in range(1, len(FEATURES_IN_USE)):
             feature.append(features_dict[FEATURES_IN_USE[j]][i])
+        # print feature
         features.append(feature)
     return features
 
+def draw_result(predicted_temps, real_temps):
+    import pylab as pl
+    
+    history = range(1, 39)
+    future = range(32, 39)
+    
+    pl.plot(history, real_temps, c='k', label="Real Temperature")
+    pl.hold('on')
+    pl.plot(future, predicted_temps, c='g', label="Predicted Temperature")
+    pl.xlabel("date")
+    pl.ylabel("TEMP")
+    pl.title('Support Vector Regression on TEMP')
+    pl.legend()
+    pl.show()
+    
+def draw_svr_single(real_data, name):
+    history = []
+    for i in range(1, 32):
+        h = [i]
+        history.append(h)
+    
+    from sklearn.svm import SVR
+    svr_rbf = SVR(kernel='rbf', C=1e3, gamma=0.1)
+    svr_lin = SVR(kernel='linear', C=1e3)
+    svr_poly = SVR(kernel='poly', C=1e3, degree=2)
+    y_rbf = svr_rbf.fit(history, real_data).predict(history)
+    y_lin = svr_lin.fit(history, real_data).predict(history)
+    y_poly = svr_poly.fit(history, real_data).predict(history)
+    
+    import pylab as pl
+    pl.scatter(history, real_data, c='k', label='data')
+    pl.hold('on')
+    pl.plot(history, y_rbf, c='g', label='RBF model')
+    pl.plot(history, y_lin, c='r', label='Linear model')
+    pl.plot(history, y_poly, c='b', label='Polynomial model')
+    pl.xlabel('data')
+    pl.ylabel('target')
+    pl.title('Support Vector Regression: ' + name)
+    pl.legend()
+    pl.show()
+    
 if __name__ == '__main__':
+    
     # these are actual data, from 20000101 to 20000131, and 20000201 to 20000207
-    real_data = load_weather("2000")
+    real_data = load_weather("2009")
+    
+    #draw_svr_single(real_data[FEATURES_IN_USE[3]][:31], FEATURES_IN_USE[3])
     
     predicted_data = {}
     for i in range(1, len(FEATURES_IN_USE)):
-        predicted_data[FEATURES_IN_USE[i]] = train_single(real_data[FEATURES_IN_USE[i]][:31])
+        predicted_data[FEATURES_IN_USE[i]] = predict_single(real_data[FEATURES_IN_USE[i]][:31])
     
     # dimensions are described as FEATURES_IN_USE
     # it includes 7 samples since we want to predict weather for 1 week
     predicted_features = compose_features(predicted_data)
     real_features = compose_features(real_data)
     
-    print train_all(real_features, predicted_features, real_data["TEMP"])
+    predicted_temps = predict_all(real_features, predicted_features, real_data["TEMP"])
+    draw_result(predicted_temps, real_data["TEMP"])
+    #print predict_all(real_features, predicted_features, real_data["TEMP"])
+    #print real_data["TEMP"][31:]
+    

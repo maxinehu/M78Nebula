@@ -22,7 +22,7 @@ PWD = "leonsun817@gmail.com"
 
 PREFIX = "ftp://"
 
-def getHtml(url):
+def get_html(url):
     page = urllib.urlopen(url)
     html = page.read()
     
@@ -31,7 +31,7 @@ def getHtml(url):
 def download(year):
     # connect to the ftp server
     try:
-        ftpConnection = ftplib.FTP(HOST)
+        ftp_connection = ftplib.FTP(HOST)
     except (socket.error, socket.gaierror):
         print "ERROR: CANNOT REACH '%s'" % HOST
         return
@@ -39,17 +39,17 @@ def download(year):
     
     # log in
     try:
-        ftpConnection.login(user = USER, passwd = PWD)
+        ftp_connection.login(user = USER, passwd = PWD)
     except ftplib.error_perm:
         print "ERROR: CANNOT LOG IN WITH USER '%s'" % USER
-        ftpConnection.quit()
+        ftp_connection.quit()
         return
     print "LOGGED IN AS '%s'" % USER
     
     # download all the data file
     try:
         directory = "pub/data/gsod/"
-        ftpConnection.cwd(directory)
+        ftp_connection.cwd(directory)
         
         print "DOWNLOADING THE DATA OF " + str(year)
         
@@ -66,20 +66,20 @@ def download(year):
         # download only the data from Orlando, FL
         # regex = r"722050-12815-%s.op.gz" % str(year)
         
-        filePattern = re.compile(regex)
+        file_pattern = re.compile(regex)
         
         url = PREFIX + HOST + '/' + directory + str(year) + '/'
-        fileList = re.findall(filePattern, getHtml(url))
+        file_list = re.findall(file_pattern, get_html(url))
 
-        ftpConnection.cwd(str(year))
+        ftp_connection.cwd(str(year))
         
         # in fact, only one file if regex = r"gsod_%s.tar" % str(year)
-        for fileName in fileList:
-            ftpConnection.retrbinary("RETR %s" % fileName, open(fileName, 'wb').write)
+        for file_name in file_list:
+            ftp_connection.retrbinary("RETR %s" % file_name, open(file_name, 'wb').write)
             
     except ftplib.error_perm:
-        print "ERROR: CANNOT READ '%s'" % fileName
-        os.unlink(fileName)
+        print "ERROR: CANNOT READ '%s'" % file_name
+        os.unlink(file_name)
         return
     else:
         print "DOWNLOAD COMPLETED\n"

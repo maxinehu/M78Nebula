@@ -19,44 +19,44 @@ import tarfile
 
 # decompress yearly data files
 def decompress_year(year):  
-    yearFileName = "gsod_%s.tar" % str(year)
-    tar = tarfile.open(yearFileName)
+    year_file_name = "gsod_%s.tar" % str(year)
+    tar = tarfile.open(year_file_name)
     names = tar.getnames()
     
     for name in names:
         tar.extract(name, path=".")
     tar.close()
     
-    os.remove(yearFileName)
+    os.remove(year_file_name)
 
 # decompress actual data files
 def decompress_day(year):
-    gzList = os.listdir('.')
+    gz_list = os.listdir('.')
     
     regex = r"[0-9]{6}-[0-9]{5}-%s.op.gz" % str(year)
-    filePattern = re.compile(regex)
+    file_pattern = re.compile(regex)
     
     if(os.path.exists("./data/") == False):
         os.mkdir("./data/")
     
     print "DECOMPRESSING DATA OF '%s'" % str(year)
-    for gzName in gzList:
-        match = filePattern.match(gzName)
+    for gz_name in gz_list:
+        match = file_pattern.match(gz_name)
         if match:
-            tmp = gzip.GzipFile(gzName)
+            tmp = gzip.GzipFile(gz_name)
             content = tmp.read()
             tmp.close()
             
-            os.remove(gzName)
+            os.remove(gz_name)
             
-            decompressedFile = file("data/" + gzName[0:-3], 'w')
-            decompressedFile.write(content)
-            decompressedFile.close()
+            decompressed_file = file("data/" + gz_name[0:-3], 'w')
+            decompressed_file.write(content)
+            decompressed_file.close()
             
     print "DECOMPRESS COMPLETED\n"
 
 if __name__ == '__main__':
     year = int(sys.argv[1])
     
-    #decompress_year(year)
+    decompress_year(year)
     decompress_day(year)

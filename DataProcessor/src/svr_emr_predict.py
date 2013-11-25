@@ -50,7 +50,7 @@ class MRSupportVectorRegressionPredict(MRJob):
         if line[0] != "S":
             # extract data, they are stored as string for each row
             row = line.strip().split('\t')
-            stn = int(row[0][STN_START: STN_END + 1])
+            stn = str(row[0][STN_START: STN_END + 1])
             moda = int(row[0][MODA_START: MODA_END + 1])
             temp = float(row[0][TEMP_START: TEMP_END + 1])
             if temp == 9999.9:

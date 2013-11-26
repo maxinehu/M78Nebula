@@ -63,7 +63,7 @@ def load_weather(year):
             # first 31 elements are used to train, last 7 elements used to test
             return real_data
 
-def knn_predict(real_data, num_neighbors):
+def knn_distances(real_data, num_neighbors):
     from sklearn.neighbors import NearestNeighbors
     import numpy as np
     
@@ -91,24 +91,35 @@ def draw_result(predicted_temps, real_temps):
     pl.title('K Nearest Neighbors on TEMP')
     pl.legend()
     pl.show()
+    
+def knn_predict(real_data, distances, indices):
+    nearest_neighbors = []
+    for i in indices[0]:
+        nearest_neighbors.append(real_data[1979 + i])
+    sum_weights = 0.0
+    for i in distances[0]:
+        sum_weights += i
+    weights = []
+    for i in range(len(distances[0])):
+        weights.append(distances[0][i]/sum_weights)
+        
+    predicted_temps = []
+    for i in range(7):
+        temp = 0
+        for n in nearest_neighbors:
+            temp += n[i] * weights[i]
+        predicted_temps.append(temp)
+        
+    return predicted_temps
 
 if __name__ == '__main__':
     real_data = {}
     for i in range(1979, 2010):
         temp_dict = load_weather(str(i))
         real_data[i] = temp_dict["TEMP"]
-    distances, indices = knn_predict(real_data, 10)
+    distances, indices = knn_distances(real_data, 10)
     
-    nearest_neighbors = []
-    for i in indices[0]:
-        nearest_neighbors.append(real_data[1979 + i])
-    
-    predicted_temps = []
-    for i in range(7):
-        temp = 0
-        for n in nearest_neighbors:
-            temp += n[i]
-        predicted_temps.append(temp/10)
+    predicted_temps = knn_predict(real_data, distances, indices)
     
     draw_result(predicted_temps, real_data[2009])
     #print predicted_temps
